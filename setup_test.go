@@ -43,7 +43,7 @@ func NewPlugin(next corednsplugin.Handler) corednsplugin.Handler {
 }
 
 func (p plugin) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
-	return dns.RcodeSuccess, nil
+	return corednsplugin.NextOrFailure(p.Name(), p.next, ctx, w, r)
 }
 
 func (p plugin) Name() string { return "noop" }
