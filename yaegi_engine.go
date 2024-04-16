@@ -20,7 +20,7 @@ const pluginAPIName = "NewPlugin"
 
 var packageRegexp = regexp.MustCompile(`(?m)^package +([^\s]+) *$`)
 
-func LoadPlugin(src string) (NewPluginAPISignature, error) {
+func LoadYaegiPlugin(src string) (NewPluginAPISignature, error) {
 	// Load the plugin in a new interpreter.
 	// For each plugin we need to use an independent interpreter to avoid name collisions.
 	yaegiInterp, err := newPluginYaegiInterpreter()
