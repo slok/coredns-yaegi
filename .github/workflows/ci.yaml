@@ -1,0 +1,23 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    # Execute the checks inside the container instead the VM.
+    container: golangci/golangci-lint:v1.57.2-alpine
+    steps:
+      - uses: actions/checkout@v3
+      - run: ./scripts/check/check.sh
+
+  unit-test:
+    name: Unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+      - run: make ci-test
