@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	corednsplugin "github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/pkg/dnstest"
 	"github.com/coredns/coredns/plugin/test"
 	"github.com/miekg/dns"
@@ -12,27 +13,27 @@ import (
 	corednsyaegi "github.com/slok/coredns-yaegi"
 )
 
-func TestLoadPlugin(t *testing.T) {
+func TestPlugin(t *testing.T) {
 	tests := map[string]struct {
 		pluginSrc  string
-		execPlugin func(t *testing.T, new corednsyaegi.NewPluginAPISignature)
+		execPlugin func(t *testing.T, handler corednsplugin.Handler)
 		expErr     bool
 	}{
 		"Empty plugin should fail.": {
 			pluginSrc:  "",
-			execPlugin: func(t *testing.T, new corednsyaegi.NewPluginAPISignature) {},
+			execPlugin: func(t *testing.T, handler corednsplugin.Handler) {},
 			expErr:     true,
 		},
 
 		"An invalid plugin syntax should fail": {
 			pluginSrc:  `package test{`,
-			execPlugin: func(t *testing.T, new corednsyaegi.NewPluginAPISignature) {},
+			execPlugin: func(t *testing.T, handler corednsplugin.Handler) {},
 			expErr:     true,
 		},
 
 		"A plugin without the required factory function, should fail.": {
 			pluginSrc:  `package test`,
-			execPlugin: func(t *testing.T, new corednsyaegi.NewPluginAPISignature) {},
+			execPlugin: func(t *testing.T, handler corednsplugin.Handler) {},
 			expErr:     true,
 		},
 
@@ -63,7 +64,7 @@ func (p plugin) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) 
 	return corednsplugin.NextOrFailure(p.Name(), p.next, ctx, w, r)
 }
 `,
-			execPlugin: func(t *testing.T, new corednsyaegi.NewPluginAPISignature) {},
+			execPlugin: func(t *testing.T, handler corednsplugin.Handler) {},
 			expErr:     false,
 		},
 
@@ -94,10 +95,9 @@ func (p plugin) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) 
 	return 0, fmt.Errorf("something")
 }
 `,
-			execPlugin: func(t *testing.T, new corednsyaegi.NewPluginAPISignature) {
+			execPlugin: func(t *testing.T, handler corednsplugin.Handler) {
 				rec := dnstest.NewRecorder(&test.ResponseWriter{})
 
-				handler := new(nil)
 				msg := dns.Msg{}
 				_, err := handler.ServeDNS(context.TODO(), rec, &msg)
 				assert.Error(t, err)
@@ -164,9 +164,8 @@ func (p demo) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (i
 // Name implements the Handler interface.
 func (p demo) Name() string { return "demo" }
 `,
-			execPlugin: func(t *testing.T, new corednsyaegi.NewPluginAPISignature) {
+			execPlugin: func(t *testing.T, handler corednsplugin.Handler) {
 				assert := assert.New(t)
-				handler := new(nil)
 
 				msg := dns.Msg{}
 				msg.SetQuestion("example.org.", dns.TypeA)
@@ -183,11 +182,14 @@ func (p demo) Name() string { return "demo" }
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			pluginFactory, err := corednsyaegi.LoadPlugin(test.pluginSrc)
+			plugin, err := corednsyaegi.NewCoreDNSPlugin(corednsyaegi.CoreDNSPluginConfig{
+				NextPlugin: nil,
+				PluginsSrc: test.pluginSrc,
+			})
 			if test.expErr {
 				assert.Error(err)
 			} else if assert.NoError(err) {
-				test.execPlugin(t, pluginFactory)
+				test.execPlugin(t, plugin)
 			}
 		})
 	}
