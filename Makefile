@@ -10,9 +10,13 @@ UNIT_TEST_CMD := ./scripts/check/unit-test.sh
 CHECK_CMD := ./scripts/check/check.sh
 
 DEV_IMAGE_NAME := local/coredns-yaegi
+PROD_IMAGE_NAME ?=  ghcr.io/slok/coredns-yaegi
 
 DOCKER_RUN_CMD := docker run --env ostype=$(OSTYPE) -v ${PWD}:/src --rm ${DEV_IMAGE_NAME}
 BUILD_DEV_IMAGE_CMD := IMAGE=${DEV_IMAGE_NAME} DOCKER_FILE_PATH=./docker/dev/Dockerfile VERSION=latest ./scripts/build/docker/build-image-dev.sh
+BUILD_PROD_IMAGE_CMD := IMAGE=${PROD_IMAGE_NAME} DOCKER_FILE_PATH=./docker/prod/Dockerfile VERSION=${VERSION} ./scripts/build/docker/build-image.sh
+BUILD_PUBLSIH_PROD_IMAGE_ALL_CMD := IMAGE=${PROD_IMAGE_NAME} DOCKER_FILE_PATH=./docker/prod/Dockerfile VERSION=${VERSION} ./scripts/build/docker/build-publish-image-all.sh
+PUBLISH_PROD_IMAGE_CMD := IMAGE=${PROD_IMAGE_NAME} VERSION=${VERSION} ./scripts/build/docker/publish-image.sh
 
 help: ## Show this help
 	@echo "Help"
@@ -20,6 +24,14 @@ help: ## Show this help
 
 .PHONY: default
 default: help
+
+.PHONY: build-image
+build-image: ## Builds the production docker image.
+	@$(BUILD_PROD_IMAGE_CMD)
+
+.PHONY: build-publish-image-all
+build-publish-image-all: ## Builds and publishes all the production docker images (multiarch).
+	@$(BUILD_PUBLSIH_PROD_IMAGE_ALL_CMD)
 
 .PHONY: build-dev-image
 build-dev-image:  ## Builds the development docker image.
