@@ -2,7 +2,11 @@ package corednsyaegi
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/coredns/caddy"
 	"github.com/coredns/coredns/core/dnsserver"
@@ -50,11 +54,26 @@ func ConfigParse(c *caddy.Controller) (pluginSrc string, err error) {
 	return pluginSourceCodeLoader(pluginSrcPath)
 }
 
-func pluginSourceCodeLoader(path string) (string, error) {
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return "", fmt.Errorf("could not read plugin file: %w", err)
+func pluginSourceCodeLoader(pathOrURL string) (string, error) {
+	u, err := url.ParseRequestURI(pathOrURL)
+	if err != nil || !strings.HasPrefix(u.Scheme, "http") {
+		// Load from local file.
+		b, err := os.ReadFile(pathOrURL)
+		if err != nil {
+			return "", fmt.Errorf("could not read plugin file: %w", err)
+		}
+		return string(b), nil
 	}
 
-	return string(b), nil
+	// Download plugin.
+	resp, err := http.Get(pathOrURL)
+	if err != nil {
+		return "", fmt.Errorf("could not download plugin: %w", err)
+	}
+	defer resp.Body.Close()
+	d, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(d), nil
 }
