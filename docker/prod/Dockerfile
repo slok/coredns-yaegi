@@ -11,7 +11,9 @@ RUN apk --no-cache add \
     git \
     make \
     curl \
-    bash
+    bash \
+    ca-certificates \
+    libcap
 
 # Compile, we are settings the plugin just before forward plugin.
 WORKDIR /tmp
@@ -21,6 +23,8 @@ RUN git clone --depth 1 --branch v${COREDNS_VERSION} https://github.com/coredns/
     sed -i '/loop:loop/a yaegi:github.com/slok/coredns-yaegi' ./plugin.cfg && \
     make
 
+RUN setcap cap_net_bind_service=+ep /tmp/coredns/coredns
+
 
 # Although we are on an specific architecture (normally linux/amd64) our go binary has been built for
 # ${ARCH} specific architecture.
@@ -28,6 +32,7 @@ RUN git clone --depth 1 --branch v${COREDNS_VERSION} https://github.com/coredns/
 # to obtain a resulting ${ARCH} image independently where we are building this image.
 FROM gcr.io/distroless/static:nonroot-${ARCH}
 
+COPY --from=build-stage /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build-stage /tmp/coredns/coredns /usr/local/bin/coredns
 
 ENTRYPOINT ["/usr/local/bin/coredns"]
