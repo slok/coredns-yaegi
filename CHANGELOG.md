@@ -10,6 +10,9 @@
 - Allow using package `github.com/coredns/coredns/plugin`.
 - Allow using package `github.com/coredns/coredns/request`.
 - Allow using package `github.com/miekg/dns`.
+- Allow using package `github.com/coredns/coredns/plugin/metrics`.
+- Allow using package `github.com/prometheus/client_golang/prometheus`.
+- Allow using package `github.com/prometheus/client_golang/prometheus/promauto`.
 - Use CoreDNS v1.11.1.
 - Use Yaegi v0.16.1.
 

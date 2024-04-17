@@ -30,7 +30,8 @@ So, checking the pros and cons, you may get the idea of these, when you need a s
 - Made in Go.
 - Heavily dependant on [Yaegi].
 - Almost similar plugin syntax to the regular coreDNS plugins.
-- No external dependencies allowed (except some CoreDNS packages).
+- No external dependencies allowed (except some CoreDNS and helper packages).
+- Ability to measure using CoreDNS plugins Prometheus.
 - Plugin must be on a single file.
 - Configurable from a local file or to download from an HTTP endpoint (e.g public repo or public/private gist).
 
@@ -78,6 +79,9 @@ Besides the ability to use all the Go  standard library, you can use these exter
 - [github.com/coredns/coredns/plugin](https://pkg.go.dev/github.com/coredns/coredns/plugin)
 - [github.com/coredns/coredns/request](https://pkg.go.dev/github.com/coredns/coredns/request)
 - [github.com/miekg/dns](https://pkg.go.dev/github.com/miekg/dns)
+- [github.com/coredns/coredns/plugin/metrics](https://pkg.go.dev/github.com/coredns/coredns/plugin/metrics)
+- [github.com/prometheus/client_golang/prometheus](https://pkg.go.dev/github.com/prometheus/client_golang/prometheus)
+- [github.com/prometheus/client_golang/prometheus/promauto](https://pkg.go.dev/github.com/prometheus/client_golang/prometheus/promauto)
 
 Do you miss any package? Depending on the general usefulness and safety we may add it so is available.
 
