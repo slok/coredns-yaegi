@@ -38,7 +38,7 @@ func TestPlugin(t *testing.T) {
 			expMetrics: `
 # HELP coredns_yaegi_metrics_dns_detail_requests_total Counts the number of DNS requests with more detail than core metrics.
 # TYPE coredns_yaegi_metrics_dns_detail_requests_total counter
-coredns_yaegi_metrics_dns_detail_requests_total{rcode="NOERROR",server_name="slok.dev.",type="A"} 1
+coredns_yaegi_metrics_dns_detail_requests_total{server_name="slok.dev.",type="A"} 1
 `,
 		},
 	}
