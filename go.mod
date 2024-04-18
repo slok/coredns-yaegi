@@ -6,7 +6,7 @@ require (
 	github.com/coredns/caddy v1.1.1
 	github.com/coredns/coredns v1.11.2
 	github.com/miekg/dns v1.1.59
-	github.com/prometheus/client_golang v1.17.0
+	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/client_model v0.5.0
 	github.com/stretchr/testify v1.9.0
 	github.com/traefik/yaegi v0.16.1
@@ -24,12 +24,11 @@ require (
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/common v0.45.0 // indirect
-	github.com/prometheus/procfs v0.11.1 // indirect
+	github.com/prometheus/common v0.48.0 // indirect
+	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/quic-go/qtls-go1-20 v0.4.1 // indirect
 	github.com/quic-go/quic-go v0.40.1 // indirect
 	go.uber.org/mock v0.3.0 // indirect
