@@ -5,6 +5,7 @@
 ### Added
 
 - Initial Yaegi plugin engine for CoreDNS.
+- Allow loading multiple plugins.
 - Allow loading plugins from local files.
 - Allow loading plugins from HTTP public URL.
 - Allow using package `github.com/coredns/coredns/plugin`.
