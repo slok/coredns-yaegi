@@ -1,7 +1,6 @@
 package corednsyaegi_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/coredns/caddy"
@@ -9,23 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRecordsParse(t *testing.T) {
-	tests := map[string]struct {
-		config string
-		expErr bool
-		expSrc string
-	}{
-		"No config should error.": {
-			config: ``,
-			expErr: true,
-		},
-
-		"A correct configuration should load the file correctly.": {
-			config: `
-yeagi ./_examples/noop/noop.go
-`,
-			expSrc: `
-package noop
+var noopSrc = `package noop
 
 import (
 	"context"
@@ -47,7 +30,41 @@ func (p plugin) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) 
 }
 
 func (p plugin) Name() string { return "noop" }
+`
+
+func TestConfigParse(t *testing.T) {
+	tests := map[string]struct {
+		config string
+		expErr bool
+		expSrc []string
+	}{
+		"No config should error.": {
+			config: ``,
+			expErr: true,
+		},
+
+		"A correct configuration with multiple plugins should load the files correctly.": {
+			config: `
+		yeagi { ./_examples/noop/noop.go ./_examples/noop/noop.go ./_examples/noop/noop.go }
+		`,
+			expSrc: []string{noopSrc, noopSrc, noopSrc},
+		},
+
+		"A correct configuration with multiple plugins in different lines should load the files correctly.": {
+			config: `
+		yeagi {
+			./_examples/noop/noop.go
+			./_examples/noop/noop.go
+		}
+		`,
+			expSrc: []string{noopSrc, noopSrc},
+		},
+
+		"A correct configuration with single plugin should load the files correctly.": {
+			config: `
+yeagi { ./_examples/noop/noop.go }
 `,
+			expSrc: []string{noopSrc},
 		},
 	}
 
@@ -61,7 +78,7 @@ func (p plugin) Name() string { return "noop" }
 			if test.expErr {
 				assert.Error(err)
 			} else if assert.NoError(err) {
-				assert.Equal(strings.TrimSpace(test.expSrc), strings.TrimSpace(gotSrc))
+				assert.Equal(test.expSrc, gotSrc)
 			}
 		})
 	}

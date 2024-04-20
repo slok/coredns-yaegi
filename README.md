@@ -34,6 +34,7 @@ So, checking the pros and cons, you may get the idea of these, when you need a s
 - Ability to measure using CoreDNS plugins Prometheus.
 - Plugin must be on a single file.
 - Configurable from a local file or to download from an HTTP endpoint (e.g public repo or public/private gist).
+- Can load multiple plugins from different files at the same time in a specific order.
 
 ## Use cases
 
@@ -78,6 +79,7 @@ Besides the ability to use all the Go  standard library, you can use these exter
 
 - [github.com/coredns/coredns/plugin](https://pkg.go.dev/github.com/coredns/coredns/plugin)
 - [github.com/coredns/coredns/request](https://pkg.go.dev/github.com/coredns/coredns/request)
+- [github.com/coredns/coredns/plugin/pkg/rcode](https://pkg.go.dev/github.com/coredns/coredns/plugin/pkg/rcode)
 - [github.com/miekg/dns](https://pkg.go.dev/github.com/miekg/dns)
 - [github.com/coredns/coredns/plugin/metrics](https://pkg.go.dev/github.com/coredns/coredns/plugin/metrics)
 - [github.com/prometheus/client_golang/prometheus](https://pkg.go.dev/github.com/prometheus/client_golang/prometheus)
@@ -89,11 +91,11 @@ Do you miss any package? Depending on the general usefulness and safety we may a
 
 The configuration is very simple, a yaegi plugin can load a single plugin per block (if you need more, you can make your plugin have a chaining logic), and it can be loaded from a local file or a public HTTP URL. Lets see some examples:
 
-Load from a local file:
+Load a single plugin from a local file:
 
 ```
 . {
-    yaegi /tmp/my-plugin.go
+    yaegi { /tmp/my-plugin.go }
     forward . 1.1.1.1
 }
 ```
@@ -102,9 +104,19 @@ Load from a URL:
 
 ```
 . {
-    yaegi https://raw.githubusercontent.com/slok/coredns-yaegi/main/_examples/allowlist/plugin.go
+    yaegi { https://raw.githubusercontent.com/slok/coredns-yaegi/main/_examples/allowlist/plugin.go }
     forward . 1.1.1.1
 }
+```
+
+Multiple plugins from different sources:
+
+```
+   yaegi {
+        /plugins/plugin1.go
+        http://plugins.example.com/plugin2.go
+        /plugins/plugin3.go
+    }
 ```
 
 Multiple blocks and different plugins:
@@ -112,7 +124,7 @@ Multiple blocks and different plugins:
 ```
 slok.dev {
     log
-    yaegi /plugins/slok.go
+    yaegi {/plugins/slok.go }
     forward . 1.1.1.1
 }
 
@@ -124,14 +136,14 @@ google.com {
 
 twitter.com {
     log
-    yaegi ./twitter.go
+    yaegi { ./twitter.go }
     forward . 8.8.8.8
 }
 
 . {
     forward . 8.8.8.8
     log
-    yaegi https://example.com/generic.go
+    yaegi { https://example.com/generic.go }
     errors
     cache
 }
@@ -152,7 +164,7 @@ Let's load our [example allowlist](_examples/allowlist) plugin directly from an 
 ```bash
 $ cat ./coredns.config
 . {
-    yaegi https://raw.githubusercontent.com/slok/coredns-yaegi/main/_examples/allowlist/plugin.go
+    yaegi { https://raw.githubusercontent.com/slok/coredns-yaegi/main/_examples/allowlist/plugin.go }
     forward . 1.1.1.1
 }
 

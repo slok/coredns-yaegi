@@ -6,52 +6,65 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 
-	"github.com/coredns/caddy"
 	"github.com/coredns/coredns/core/dnsserver"
+
+	"github.com/coredns/caddy"
 	"github.com/coredns/coredns/plugin"
 )
 
 func init() { plugin.Register("yaegi", setup) }
 
 func setup(c *caddy.Controller) error {
-	src, err := ConfigParse(c)
+	srcs, err := ConfigParse(c)
 	if err != nil {
 		return fmt.Errorf("could setup plugin config: %w", err)
 	}
 
+	// Reverse plugins to execute in declared order.
+	slices.Reverse(srcs)
+
 	dnsserver.GetConfig(c).AddPlugin(func(next plugin.Handler) plugin.Handler {
-		coreDNSPlugin, err := NewCoreDNSPlugin(CoreDNSPluginConfig{
-			NextPlugin: next,
-			PluginsSrc: src,
-		})
-		if err != nil {
-			panic(fmt.Errorf("could not create plugin: %w", err))
+		for _, src := range srcs {
+			next, err = NewCoreDNSPlugin(CoreDNSPluginConfig{
+				NextPlugin: next,
+				PluginsSrc: src,
+			})
+			if err != nil {
+				panic(fmt.Errorf("could not create plugin: %w", err))
+			}
 		}
 
-		return coreDNSPlugin
+		return next
 	})
 
 	return nil
 }
 
-func ConfigParse(c *caddy.Controller) (pluginSrc string, err error) {
-	pluginSrcPath := ""
-	for c.Next() {
-		if !c.NextArg() {
-			// If no values then error,
-			return "", c.ArgErr()
+func ConfigParse(c *caddy.Controller) (pluginsSrc []string, err error) {
+	pluginSrcPaths := []string{}
+
+	// Get block.
+	c.Next()
+	for c.NextBlock() {
+		pluginSrcPaths = append(pluginSrcPaths, c.Val())
+	}
+
+	if len(pluginSrcPaths) == 0 {
+		return nil, fmt.Errorf("missing plugin file paths")
+	}
+
+	for _, p := range pluginSrcPaths {
+		pluginSrc, err := pluginSourceCodeLoader(p)
+		if err != nil {
+			return nil, fmt.Errorf("could not load plugin src on %q: %w", p, err)
 		}
-
-		pluginSrcPath = c.Val()
+		pluginsSrc = append(pluginsSrc, pluginSrc)
 	}
 
-	if pluginSrcPath == "" {
-		return "", fmt.Errorf("missing plugin file path")
-	}
-
-	return pluginSourceCodeLoader(pluginSrcPath)
+	return pluginsSrc, err
 }
 
 func pluginSourceCodeLoader(pathOrURL string) (string, error) {
