@@ -1,4 +1,4 @@
-package corednsyaegi
+package yaegi
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 	"github.com/traefik/yaegi/stdlib/unsafe"
+
+	"github.com/slok/coredns-yaegi/internal/yaegi/custom"
 )
 
 // PluginFactoryAPI is the function signature that plugins must implement.
@@ -74,7 +76,7 @@ func newPluginYaegiInterpreter() (*interp.Interpreter, error) {
 	}
 
 	// Add our own plugin library.
-	err = i.Use(Symbols)
+	err = i.Use(custom.Symbols)
 	if err != nil {
 		return nil, fmt.Errorf("yaegi could not use custom symbols: %w", err)
 	}

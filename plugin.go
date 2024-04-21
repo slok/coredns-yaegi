@@ -6,6 +6,8 @@ import (
 
 	corednsplugin "github.com/coredns/coredns/plugin"
 	"github.com/miekg/dns"
+
+	"github.com/slok/coredns-yaegi/internal/yaegi"
 )
 
 type CoreDNSPlugin struct {
@@ -32,7 +34,7 @@ func NewCoreDNSPlugin(config CoreDNSPluginConfig) (*CoreDNSPlugin, error) {
 	}
 
 	// Load plugin factory.
-	pluginfactory, err := LoadYaegiPlugin(config.PluginsSrc)
+	pluginfactory, err := yaegi.LoadYaegiPlugin(config.PluginsSrc)
 	if err != nil {
 		return nil, fmt.Errorf("could not load plugin source: %w", err)
 	}
