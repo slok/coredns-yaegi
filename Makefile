@@ -26,11 +26,11 @@ help: ## Show this help
 default: help
 
 .PHONY: build-image
-build-image: ## Builds the production docker image.
+build-image:  ## Builds the production docker image.
 	@$(BUILD_PROD_IMAGE_CMD)
 
 .PHONY: build-publish-image-all
-build-publish-image-all: ## Builds and publishes all the production docker images (multiarch).
+build-publish-image-all:  ## Builds and publishes all the production docker images (multiarch).
 	@$(BUILD_PUBLSIH_PROD_IMAGE_ALL_CMD)
 
 .PHONY: build-dev-image
