@@ -16,7 +16,7 @@ import (
 // PluginFactoryAPI is the function signature that plugins must implement.
 // This function should return the plugin instance.
 // The method should be call `NewPlugin`.
-type NewPluginAPISignature = func(next corednsplugin.Handler) corednsplugin.Handler
+type NewPluginAPISignature = func(next corednsplugin.Handler, options string) corednsplugin.Handler
 
 const pluginAPIName = "NewPlugin"
 

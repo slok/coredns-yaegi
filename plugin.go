@@ -17,6 +17,7 @@ type CoreDNSPlugin struct {
 type CoreDNSPluginConfig struct {
 	NextPlugin corednsplugin.Handler
 	PluginsSrc string
+	RawOptions string
 }
 
 func (c *CoreDNSPluginConfig) defaults() error {
@@ -40,7 +41,7 @@ func NewCoreDNSPlugin(config CoreDNSPluginConfig) (*CoreDNSPlugin, error) {
 	}
 
 	return &CoreDNSPlugin{
-		yaegiPlugin: pluginfactory(config.NextPlugin),
+		yaegiPlugin: pluginfactory(config.NextPlugin, config.RawOptions),
 	}, nil
 }
 

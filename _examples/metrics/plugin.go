@@ -16,7 +16,7 @@ type plugin struct {
 	reqCounter *prometheus.CounterVec
 }
 
-func NewPlugin(next corednsplugin.Handler) corednsplugin.Handler {
+func NewPlugin(next corednsplugin.Handler, rawOptions string) corednsplugin.Handler {
 	subsystem := os.Getenv("COREDNS_YAEGI_PLUGIN_METRICS_PREFIX")
 	if subsystem == "" {
 		subsystem = "yaegi_metrics"
