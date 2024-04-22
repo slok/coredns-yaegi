@@ -17,6 +17,11 @@ import (
 
 func init() { plugin.Register("yaegi", setup) }
 
+type PluginSrcWithOpts struct {
+	Src        string
+	RawOptions string
+}
+
 func setup(c *caddy.Controller) error {
 	srcs, err := ConfigParse(c)
 	if err != nil {
@@ -30,7 +35,8 @@ func setup(c *caddy.Controller) error {
 		for _, src := range srcs {
 			next, err = NewCoreDNSPlugin(CoreDNSPluginConfig{
 				NextPlugin: next,
-				PluginsSrc: src,
+				PluginsSrc: src.Src,
+				RawOptions: src.RawOptions,
 			})
 			if err != nil {
 				panic(fmt.Errorf("could not create plugin: %w", err))
@@ -43,28 +49,46 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func ConfigParse(c *caddy.Controller) (pluginsSrc []string, err error) {
-	pluginSrcPaths := []string{}
+func ConfigParse(c *caddy.Controller) ([]PluginSrcWithOpts, error) {
+	pluginSrcPaths := []PluginSrcWithOpts{}
 
 	// Get block.
 	c.Next()
 	for c.NextBlock() {
-		pluginSrcPaths = append(pluginSrcPaths, c.Val())
+		pluginSrc := PluginSrcWithOpts{Src: c.Val()}
+		opts := c.RemainingArgs()
+		// Sanitize end block (remove end curly brace) if we are on the same line.
+		if len(opts) > 0 && opts[len(opts)-1] == "}" {
+			opts = opts[:len(opts)-1]
+		}
+
+		switch {
+		case len(opts) == 1:
+			pluginSrc.RawOptions = opts[0]
+		case len(opts) > 1:
+			return nil, fmt.Errorf("0 or 1 argument raw string options is required, %d received: %#v", len(opts), opts)
+		}
+
+		pluginSrcPaths = append(pluginSrcPaths, pluginSrc)
 	}
 
 	if len(pluginSrcPaths) == 0 {
 		return nil, fmt.Errorf("missing plugin file paths")
 	}
 
+	pluginsSrc := []PluginSrcWithOpts{}
 	for _, p := range pluginSrcPaths {
-		pluginSrc, err := pluginSourceCodeLoader(p)
+		pluginSrc, err := pluginSourceCodeLoader(p.Src)
 		if err != nil {
 			return nil, fmt.Errorf("could not load plugin src on %q: %w", p, err)
 		}
-		pluginsSrc = append(pluginsSrc, pluginSrc)
+		pluginsSrc = append(pluginsSrc, PluginSrcWithOpts{
+			Src:        pluginSrc,
+			RawOptions: p.RawOptions,
+		})
 	}
 
-	return pluginsSrc, err
+	return pluginsSrc, nil
 }
 
 func pluginSourceCodeLoader(pathOrURL string) (string, error) {

@@ -35,6 +35,7 @@ So, checking the pros and cons, you may get the idea of these, when you need a s
 - Plugin must be on a single file.
 - Configurable from a local file or to download from an HTTP endpoint (e.g public repo or public/private gist).
 - Can load multiple plugins from different files at the same time in a specific order.
+- Can pass each plugin any kind of string configuration.
 
 ## Use cases
 
@@ -44,7 +45,7 @@ So, checking the pros and cons, you may get the idea of these, when you need a s
 
 ## Writing plugins
 
-To write a plugin you only need to implement a method: `func NewPlugin(next corednsplugin.Handler) corednsplugin.Handler`.
+To write a plugin you only need to implement a method: `func NewPlugin(next corednsplugin.Handler, rawOptions string) corednsplugin.Handler`.
 
 This method should return the plugin itself. Example of a NOOP plugin:
 
@@ -62,7 +63,7 @@ type plugin struct {
     next corednsplugin.Handler
 }
 
-func NewPlugin(next corednsplugin.Handler) corednsplugin.Handler {
+func NewPlugin(next corednsplugin.Handler, rawOptions string) corednsplugin.Handler {
    return plugin{next: next}
 }
 
@@ -72,6 +73,27 @@ func (p plugin) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) 
 
 func (p plugin) Name() string { return "noop" }
 ```
+
+### Options
+
+You have two ways of passing options to plugins.
+
+#### Raw options
+
+When declaring the plugin on the CoreConfig file, optionally, you can pass as an argument a string, this string can be anything, so
+when the factory is called from the yaegi plugin, the plugin will receive that string, then each plugin can do whatever it wants with the `rawOptions` string, usage ideas/examples:
+
+- Simple string: `opt1`.
+- A full JSON config: `{"opt1": "val1", "opt2": true}`.
+- A simple key value: `opt1=val1,opt2=val2`.
+
+#### Env vars
+
+Plugins will have access to the OS env vars, so you can load from there options, secrets...
+
+#### Combination of both
+
+As an idea, you can combine raw options and env vars, for example a full config file and some keys will have `${SOMETHING}`, so the plugin can load `${SOMETHING}` from the env
 
 ### Allowed packages?
 
@@ -89,9 +111,9 @@ Do you miss any package? Depending on the general usefulness and safety we may a
 
 ## Configuration
 
-The configuration is very simple, a yaegi plugin can load a single plugin per block (if you need more, you can make your plugin have a chaining logic), and it can be loaded from a local file or a public HTTP URL. Lets see some examples:
+The configuration is very simple, a yaegi plugin can load a single plugin per block (if you need more, you can make your plugin have a chaining logic), and it can be loaded from a local file or a public HTTP URL. also the plugins can receive an string as an argument that will be passed to the plugins on load. Lets see some examples:
 
-Load a single plugin from a local file:
+Load a single plugin from a local file without options on a single line:
 
 ```
 . {
@@ -100,26 +122,26 @@ Load a single plugin from a local file:
 }
 ```
 
-Load from a URL:
+Load from a URL with options in a single line:
 
 ```
 . {
-    yaegi { https://raw.githubusercontent.com/slok/coredns-yaegi/main/_examples/allowlist/plugin.go }
+    yaegi { https://raw.githubusercontent.com/slok/coredns-yaegi/main/_examples/allowlist/plugin.go "k1=v1,k2=v2" }
     forward . 1.1.1.1
 }
 ```
 
-Multiple plugins from different sources:
+Multiple plugins from different sources, some with different options:
 
 ```
    yaegi {
-        /plugins/plugin1.go
+        /plugins/plugin1.go "{\"opt1\": true, \"opt2\": \"something\"}"
         http://plugins.example.com/plugin2.go
-        /plugins/plugin3.go
+        /plugins/plugin3.go "opt1=val1,opt2=val2"
     }
 ```
 
-Multiple blocks and different plugins:
+Multiple blocks and different plugins and different options:
 
 ```
 slok.dev {
@@ -136,14 +158,14 @@ google.com {
 
 twitter.com {
     log
-    yaegi { ./twitter.go }
+    yaegi { ./twitter.go "something" }
     forward . 8.8.8.8
 }
 
 . {
     forward . 8.8.8.8
     log
-    yaegi { https://example.com/generic.go }
+    yaegi { https://example.com/generic.go "{\"opt1\": \"val1\"}" }
     errors
     cache
 }

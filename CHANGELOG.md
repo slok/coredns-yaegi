@@ -15,6 +15,7 @@
 - Allow using package `github.com/prometheus/client_golang/prometheus`.
 - Allow using package `github.com/prometheus/client_golang/prometheus/promauto`.
 - Allow using package `github.com/coredns/coredns/plugin/pkg/rcode`.
+- Allow using string configuration on each plugin load.
 - Use CoreDNS v1.11.1.
 - Use Yaegi v0.16.1.
 

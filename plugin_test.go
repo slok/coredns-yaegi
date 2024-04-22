@@ -54,7 +54,7 @@ type plugin struct {
 	next corednsplugin.Handler
 }
 
-func NewPlugin(next corednsplugin.Handler) corednsplugin.Handler {
+func NewPlugin(next corednsplugin.Handler, rawOpts string) corednsplugin.Handler {
 	return plugin{next: next}
 }
 
@@ -85,7 +85,7 @@ type plugin struct {
 	next corednsplugin.Handler
 }
 
-func NewPlugin(next corednsplugin.Handler) corednsplugin.Handler {
+func NewPlugin(next corednsplugin.Handler, rawOpts string) corednsplugin.Handler {
 	return plugin{next: next}
 }
 
@@ -122,7 +122,7 @@ import (
 	"github.com/miekg/dns"
 )
 
-func NewPlugin(next corednsplugin.Handler) corednsplugin.Handler {
+func NewPlugin(next corednsplugin.Handler, rawOpts string) corednsplugin.Handler {
 	return demo{}
 }
 
