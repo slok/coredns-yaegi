@@ -1,7 +1,7 @@
 # Set also `ARCH` ARG here so we can use it on all the `FROM`s. 
 ARG ARCH
 
-FROM golang:1.22-alpine as build-stage
+FROM golang:1.23-alpine as build-stage
 
 ARG COREDNS_VERSION="1.11.1"
 ARG VERSION
