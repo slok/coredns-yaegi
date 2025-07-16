@@ -1,9 +1,9 @@
 # Set also `ARCH` ARG here so we can use it on all the `FROM`s. 
 ARG ARCH
 
-FROM golang:1.22-alpine as build-stage
+FROM golang:1.24-alpine as build-stage
 
-ARG COREDNS_VERSION="1.11.1"
+ARG COREDNS_VERSION="1.12.2"
 ARG VERSION
 
 RUN apk --no-cache add \
