@@ -27,6 +27,7 @@ func init() {
 		"MX":                           reflect.ValueOf(plugin.MX),
 		"NS":                           reflect.ValueOf(plugin.NS),
 		"Namespace":                    reflect.ValueOf(constant.MakeFromLiteral("\"coredns\"", token.STRING, 0)),
+		"NativeHistogramBucketFactor":  reflect.ValueOf(&plugin.NativeHistogramBucketFactor).Elem(),
 		"NextOrFailure":                reflect.ValueOf(plugin.NextOrFailure),
 		"OriginsFromArgsOrServerBlock": reflect.ValueOf(plugin.OriginsFromArgsOrServerBlock),
 		"PTR":                          reflect.ValueOf(plugin.PTR),
@@ -45,11 +46,13 @@ func init() {
 		"Name":           reflect.ValueOf((*plugin.Name)(nil)),
 		"Options":        reflect.ValueOf((*plugin.Options)(nil)),
 		"Plugin":         reflect.ValueOf((*plugin.Plugin)(nil)),
+		"PluginTracker":  reflect.ValueOf((*plugin.PluginTracker)(nil)),
 		"ServiceBackend": reflect.ValueOf((*plugin.ServiceBackend)(nil)),
 		"Zones":          reflect.ValueOf((*plugin.Zones)(nil)),
 
 		// interface wrapper definitions
 		"_Handler":        reflect.ValueOf((*_github_com_coredns_coredns_plugin_Handler)(nil)),
+		"_PluginTracker":  reflect.ValueOf((*_github_com_coredns_coredns_plugin_PluginTracker)(nil)),
 		"_ServiceBackend": reflect.ValueOf((*_github_com_coredns_coredns_plugin_ServiceBackend)(nil)),
 	}
 }
@@ -66,6 +69,20 @@ func (W _github_com_coredns_coredns_plugin_Handler) Name() string {
 }
 func (W _github_com_coredns_coredns_plugin_Handler) ServeDNS(a0 context.Context, a1 dns.ResponseWriter, a2 *dns.Msg) (int, error) {
 	return W.WServeDNS(a0, a1, a2)
+}
+
+// _github_com_coredns_coredns_plugin_PluginTracker is an interface wrapper for PluginTracker type
+type _github_com_coredns_coredns_plugin_PluginTracker struct {
+	IValue     interface{}
+	WGetPlugin func() string
+	WSetPlugin func(name string)
+}
+
+func (W _github_com_coredns_coredns_plugin_PluginTracker) GetPlugin() string {
+	return W.WGetPlugin()
+}
+func (W _github_com_coredns_coredns_plugin_PluginTracker) SetPlugin(name string) {
+	W.WSetPlugin(name)
 }
 
 // _github_com_coredns_coredns_plugin_ServiceBackend is an interface wrapper for ServiceBackend type
